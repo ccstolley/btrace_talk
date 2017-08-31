@@ -1,0 +1,36 @@
+Getting to know
+     Btrace
+
+What is it?
+
+- A dynamic tracing tool for java
+- Works on compiled byte code
+- Can do cool tricks at runtime
+
+Why might I want to use it?
+
+- Trace/Count/Inspect function
+  calls on a running jvm
+- Profiling
+- Deadlock detection / debugging
+- Probably other stuff
+
+But why not logging / debugger /
+VisualVM etc?
+
+- works on uninstrumented code
+- can attach to running processes
+- prints results to console
+- properly constrained, the performance
+  penalty isn't too terrible
+
+How do I Btrace?
+
+- Must use Hotspot (Oracle) java8
+- Must run btrace as same euid as jvm
+  (not root)
+- Must write a small trace script
+
+Show and Tell
+
+github.com/ccstolley/btrace_talk
