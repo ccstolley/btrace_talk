@@ -13,12 +13,13 @@ import com.sun.btrace.annotations.*;
     @Property
     Profiler profiler = BTraceUtils.Profiling.newProfiler();
     
-    @OnMethod(clazz="/org\\.apache\\.cassandra\\.db\\.Column.*/", method="/.*/")
+    @OnMethod(clazz="/com\\.sproutsocial\\.ads.AdHelper.*/", method="/.*/")
     void entry(@ProbeMethodName(fqn=true) String probeMethod) { 
         BTraceUtils.Profiling.recordEntry(profiler, probeMethod);
     }
 
-    @OnMethod(clazz="/org\\.apache\\.cassandra\\.db\\.Column.*/", method="/.*/", location=@Location(value=Kind.RETURN))
+    @OnMethod(clazz="/com\\.sproutsocial\\.ads.AdHelper.*/", method="/.*/",
+              location=@Location(value=Kind.RETURN))
     void exit(@ProbeMethodName(fqn=true) String probeMethod, @Duration long duration) { 
         BTraceUtils.Profiling.recordExit(profiler, probeMethod, duration);
     }

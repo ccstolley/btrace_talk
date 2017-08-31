@@ -15,7 +15,14 @@ Why might I want to use it?
 - Deadlock detection / debugging
 - Probably other stuff
 
-But why not logging / debugger /
+Why might I NOT want to use it?
+
+- It can get smashy and crashy
+- It can make things slow
+- It can fail to unload the instrumented classes
+- It causes your process to listen on port 2020
+
+Why not logging / debugger /
 VisualVM etc?
 
 - works on uninstrumented code
@@ -30,6 +37,59 @@ How do I Btrace?
 - Must run btrace as same euid as jvm
   (not root)
 - Must write a small trace script
+
+What does a trace script look like?
+
+Let's watch HTTP connections!
+
+@BTrace public class GraphTracer {
+    @OnMethod(
+        clazz="+java.net.URL",
+        method="/open.*/"
+    )
+    public static void onOpenConnection(@Self URL self) {
+        println("open() " + self);
+    }
+}
+
+Let's trace GET requests to the Facebook Graph.
+
+@BTrace public class GraphTracer {
+    @OnMethod(
+        clazz="+com.sproutsocial.facebook.commons.client.RobustWebRequestor/",
+        method="/executeGet/"
+    )
+    public static void executeGet(String url) {
+        println("executeGet: " + url);
+    }
+}
+
+How about some profiling?
+
+@BTrace class SproutProfiling {
+    @Property
+    Profiler profiler = BTraceUtils.Profiling.newProfiler();
+    
+    @OnMethod(clazz="/org.apache.cassandra.db.Column.*/", method="/.*/")
+    void entry(@ProbeMethodName(fqn=true) String probeMethod) { 
+        BTraceUtils.Profiling.recordEntry(profiler, probeMethod);
+    }
+
+    @OnMethod(clazz="/org.apache.cassandra.db.Column.*/",
+              method="/.*/", location=@Location(value=Kind.RETURN))
+    void exit(@ProbeMethodName(fqn=true) String probeMethod,
+              @Duration long duration) { 
+        BTraceUtils.Profiling.recordExit(profiler, probeMethod, duration);
+    }
+
+    @OnTimer(5000)
+    void timer() {
+        BTraceUtils.Profiling.printSnapshot(
+                "So profiler. Much CPU. Wow.", profiler,
+                "%2$-10s %7$-15s %8$-15s %3$-15s %4$-15s %1$s");
+    }
+}
+
 
 Show and Tell
 
